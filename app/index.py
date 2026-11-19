@@ -36,9 +36,11 @@ class PatientData(BaseModel):
     ca: int = Field(..., ge=0, le=4)
     thal: int = Field(..., ge=0, le=3)
 
-@app.get("/")
+from fastapi.responses import FileResponse
+
+@app.get("/", include_in_schema=False)
 def home():
-    return {"message": "Heart Disease Prediction API is running", "docs": "/docs"}
+    return FileResponse("public/index.html")
 
 @app.get("/health")
 def health():
