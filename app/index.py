@@ -22,19 +22,19 @@ FEATURE_COLUMNS = [
 ]
 
 class PatientData(BaseModel):
-    age: int = Field(..., ge=1, le=120)
-    sex: int
-    cp: int
-    trestbps: int
-    chol: int
-    fbs: int
-    restecg: int
-    thalach: int
-    exang: int
-    oldpeak: float
-    slope: int
-    ca: int
-    thal: int
+    age: int = Field(..., ge=29, le=77)
+    sex: int = Field(..., ge=0, le=1)
+    cp: int = Field(..., ge=0, le=3)
+    trestbps: int = Field(..., ge=94, le=200)
+    chol: int = Field(..., ge=126, le=564)
+    fbs: int = Field(..., ge=0, le=1)
+    restecg: int = Field(..., ge=0, le=2)
+    thalach: int = Field(..., ge=71, le=202)
+    exang: int = Field(..., ge=0, le=1)
+    oldpeak: float = Field(..., ge=0, le=6.2)
+    slope: int = Field(..., ge=0, le=2)
+    ca: int = Field(..., ge=0, le=4)
+    thal: int = Field(..., ge=0, le=3)
 
 @app.get("/")
 def home():
@@ -46,14 +46,19 @@ def health():
 
 @app.post("/predict")
 def predict(data: PatientData):
-    input_data = pd.DataFrame([[getattr(data, col) for col in FEATURE_COLUMNS]], columns=FEATURE_COLUMNS)
+    input_data = pd.DataFrame(
+        [[getattr(data, col) for col in FEATURE_COLUMNS]],
+        columns=FEATURE_COLUMNS
+    )
     prediction = int(model.predict(input_data)[0])
-    result = "Positive class" if prediction == 1 else "Negative class"
-    response = {"prediction": prediction, "result": result}
+    response = {
+        "prediction": prediction,
+        "result": "Positive class" if prediction == 1 else "Negative class",
+        "disclaimer": "Educational demonstration only; not a medical diagnosis."
+    }
     if hasattr(model, "predict_proba"):
         response["class_probabilities"] = {
             str(label): round(float(prob), 4)
             for label, prob in zip(model.classes_, model.predict_proba(input_data)[0])
         }
-    response["disclaimer"] = "Educational demonstration only; not a medical diagnosis."
     return response
